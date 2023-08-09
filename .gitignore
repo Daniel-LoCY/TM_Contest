@@ -1,3 +1,7 @@
+# custom
+*.pt
+
+
 devel/
 logs/
 build/
