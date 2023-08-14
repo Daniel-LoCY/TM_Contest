@@ -1,0 +1,15 @@
+<launch>
+
+    <!-- <node pkg="tf2_ros" type="static_transform_publisher" name="static_transform_publisher1" args="1 1 0 0 0 0 map arm" /> -->
+
+    <node pkg="tf2_ros" type="static_transform_publisher" name="static_transform_publisher2" args="0.391, 0.3, -0.18 0 0 0 arm aruco" />
+
+    <node pkg="tf2_ros" type="static_transform_publisher" name="static_transform_publisher3" args="0.21875584851190344, 0.013555105268257336, 0.7503763143728246 0 0 0 aruco camera" />
+
+    <!-- <node pkg="tf2_ros" type="static_transform_publisher" name="static_transform_publisher4" args="0.116.00279998779298 0.556.9985961914062 -0.229.9995574951172 -3.141587327267613 0 -2.7925220095009653   arm tool" /> -->
+
+    <!-- <node pkg="tf2_ros" type="static_transform_publisher" name="static_transform_publisher5" args="0 0.5 0 0 0 0   tool target" /> -->
+
+    <!-- <node pkg="main" type="receive_yolo.py" name="receive_yolo" output="screen" /> -->
+
+</launch>

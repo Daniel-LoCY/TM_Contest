@@ -1,1 +1,1 @@
-contest_msgs/yolo_info[] info
+contest_msgs/yolo_info info

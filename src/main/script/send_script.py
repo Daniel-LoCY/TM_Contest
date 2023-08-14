@@ -3,6 +3,7 @@
 import rospy
 from tm_msgs.srv import *
 from tm_msgs.msg import *
+from util import *
 
 def tm_send_script_client(cmd: str):
     rospy.wait_for_service('tm_driver/send_script')
@@ -53,6 +54,7 @@ def radius2degree(radius: tuple()):
     return degree
 
 def feedback_callback(msg: FeedbackState): # 手臂姿態
+    return
     print(msg, '\n')
     # calculate position
     print(f"x: {msg.tool_pose[0]*1000}")
@@ -63,9 +65,18 @@ def feedback_callback(msg: FeedbackState): # 手臂姿態
     print(f"rz: {msg.tool_pose[5]*180/3.1415926}")
     print()
 
+    # rx, ry, rz transform to radius
+    rx = msg.tool_pose[3]
+    ry = msg.tool_pose[4]
+    rz = msg.tool_pose[5]
+    print(f"rx: {rx}")
+    print(f"ry: {ry}")
+    print(f"rz: {rz}")
+
+
 sub = rospy.Subscriber('feedback_states', FeedbackState, feedback_callback)
 
-delay = 3
+delay = 5
 z_low = 26 # z軸手臂底座夾取最低點 mm
 z_low_floor = -280 # z軸機台放置平面夾取最低點 mm
 speed = 200
@@ -74,116 +85,18 @@ m = 100
 def main(x, y):
 
 
-    tm_send_gripper_client(False)
-
-    rospy.sleep(delay)
-
-    cmd = f"PTP(\"CPP\",{x}, {y}, {z_low_floor},180,0,180,{speed},{m},0,false,0,2,4)"
-    resp = tm_send_script_client(cmd)
-
-    rospy.sleep(delay)
-
     tm_send_gripper_client(True)
 
-    rospy.sleep(delay)
+    # rospy.sleep(delay)
 
-    cmd = f"Move_PTP(\"CPP\",0,0,50,0,0,0,{speed},{m},0,false)"
+    cmd = f"PTP(\"CPP\",{x},  {y}, 30,200,0,180,{speed},{m},0,false,0,2,4)"
+    # cmd = f"Move_PTP(\"CPP\",0,0,0,20,0,0,{speed},{m},0,false)"
+    pose = get_tf("base", "tool_target")
+    print(pose)
+    cmd = f"PTP(\"CPP\",{pose.translation.x},  {pose.translation.y}, {pose.translation.z}, {pose.rotation.x}, {pose.rotation.y}, {pose.rotation.z}, {speed},{m},0,false,0,2,4)"
     resp = tm_send_script_client(cmd)
-
-    rospy.sleep(delay)
-
-    cmd = f"Move_PTP(\"CPP\",0,0,0,-20,0,0,{speed},{m},0,false)"
-    resp = tm_send_script_client(cmd)
-
-    rospy.sleep(delay+3)
-
-    cmd = f"Move_PTP(\"CPP\",0,0,0,20,0,0,{speed},{m},0,false)"    
-    resp = tm_send_script_client(cmd)
-
-    rospy.sleep(delay)
-
-    cmd = f"Move_PTP(\"CPP\",0,0,-50,0,0,0,{speed},{m},0,false)"
-    resp = tm_send_script_client(cmd)
-
-    rospy.sleep(delay)
-
-    tm_send_gripper_client(False)
-
-    rospy.sleep(delay)
-
-    cmd = f"PTP(\"CPP\",{x}, {y}, {z_low_floor},180,0,180,{speed},{m},0,false,0,2,4)"
-    resp = tm_send_script_client(cmd)
-
-    exit()
-    # target = (2.1879980241745374, -0.19477874185940608, 1.5178682638164982, 0.252481270105828, 1.5732107486391624, -0.16581598283268328)
-    # target_degree = radius2degree(target)
-    # cmd = f"PTP(\"JPP\",{target_degree[0]},{target_degree[1]},{target_degree[2]},{target_degree[3]},{target_degree[4]},{target_degree[5]},{speed},{m},0,false)"
-    # resp = tm_send_script_client(cmd)
-
-def catch_test():
-
-    cmd = f"PTP(\"CPP\",100,300,{z_low},180,0,-135,{speed},{m},0,false,0,2,4)"
-    resp = tm_send_script_client(cmd)
-
-    rospy.sleep(delay)
-
-    cmd = f"PTP(\"CPP\",-100,250,{z_low},180,0,-135,{speed},{m},0,false,0,2,4)"
-    resp = tm_send_script_client(cmd)
-
-    rospy.sleep(delay)
-
-    tm_send_gripper_client(True)
-
-    rospy.sleep(delay)
-
-    cmd = f"Move_PTP(\"CPP\",0,0,50,0,0,0,{speed},{m},0,false)"
-    resp = tm_send_script_client(cmd)
-
-    rospy.sleep(delay)
-
-    cmd = f"Move_PTP(\"CPP\",-100,-100,0,0,0,0,{speed},{m},0,false)"
-    resp = tm_send_script_client(cmd)
-
-    rospy.sleep(delay)
-
-    cmd = f"Move_PTP(\"CPP\",0,0,-50,0,0,0,{speed},{m},0,false)"
-    resp = tm_send_script_client(cmd)
-
-    rospy.sleep(delay)
-
-    tm_send_gripper_client(False)
-
-    rospy.sleep(delay)
-
-    cmd = f"PTP(\"CPP\",-100,250,100,180,0,-135,{speed},{m},0,false,0,2,4)"
-    resp = tm_send_script_client(cmd)
-
-    rospy.sleep(delay)
-
-def ready():
-    tm_send_gripper_client(True)
-    cmd = f"PTP(\"CPP\",391,300, {z_low_floor+100},180,0,180,{speed},{m},0,false,0,2,4)"
-    resp = tm_send_script_client(cmd)
-
-def test():
-    x = 390
-    y = 545
-    z = z_low_floor+10
-    cmd = f"PTP(\"CPP\",{x}, {y}, {z},180,0,180,{speed},{m},0,false,0,2,4)"
-    resp = tm_send_script_client(cmd)
-    tm_send_gripper_client(True)
-    with open('point_at_arm.txt', 'w') as f:
-        f.write(f"{x} {y} {z}\n")
+    # print(resp)
 
 if __name__ == '__main__':
-
     rospy.init_node('send_script')
-    rospy.loginfo('Sending script')
-    
-    catch_test(), exit()
-    # ready(), exit()
-    # test(), exit()
-    main(370.5, 500.5)
-    # radius_set = (2.419723132731749, -0.5256350951468007, 2.37297879664646, -0.27194168727082313, 1.5727549486185954, 0.06481958907187409)
-    # degree_set = radius2degree(radius_set)
-    # print(degree_set)
+    main(152, 380)

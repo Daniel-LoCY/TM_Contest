@@ -8,7 +8,7 @@ import math
 from contest_msgs.msg import *
 
 # model
-model = YOLO("/yolo/ult/s-best-10.pt")
+model = YOLO("/yolo/ult/ss-best-24.pt")
 # object classes
 classNames = ['base', 'cotton-swab', 'tube']
 
@@ -20,7 +20,7 @@ pub = rospy.Publisher('/yolo', yolo, queue_size=10)
 
 def callback(data):
     img = bridge.imgmsg_to_cv2(data, "passthrough")
-    results = model(img, stream=True)
+    results = model(img, stream=True, half=True)
     # coordinates
     for r in results:
         boxes = r.boxes
@@ -44,7 +44,7 @@ def callback(data):
             info.y1 = y1
             info.x2 = x2
             info.y2 = y2
-            msg.info = [info]
+            msg.info = info
             pub.publish(msg)
 
 sub = rospy.Subscriber("/camera/color", Image, callback)

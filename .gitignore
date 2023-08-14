@@ -1,5 +1,9 @@
 # custom
 *.pt
+*.txt
+*.jpg
+*.png
+*.py
 
 
 devel/

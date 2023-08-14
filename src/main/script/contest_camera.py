@@ -14,14 +14,21 @@ k4a.start()
 
 
 def main():
-    rospy.init_node('listener')
+    rospy.init_node('camera')
     bridge = CvBridge()
-    pub = rospy.Publisher('/camera/color', Image, queue_size=10)
+    pub_color = rospy.Publisher('/camera/color', Image, queue_size=10)
+    pub_ir = rospy.Publisher('/camera/ir', Image, queue_size=10)
+    pub_depth = rospy.Publisher('/camera/depth', Image, queue_size=10)
 
     while not rospy.is_shutdown():
-        frame = k4a.get_capture().color
+        capture = k4a.get_capture()
+        frame = capture.color
         frame = cv2.cvtColor(frame, cv2.COLOR_BGRA2BGR)
-        pub.publish(bridge.cv2_to_imgmsg(frame, "passthrough"))
+        pub_color.publish(bridge.cv2_to_imgmsg(frame, "passthrough"))
+
+        pub_ir.publish(bridge.cv2_to_imgmsg(capture.ir, "passthrough"))
+        pub_depth.publish(bridge.cv2_to_imgmsg(capture.depth, "passthrough"))
+        
         cv2.imshow('frame', frame)
         if cv2.waitKey(1) & 0xFF == ord('q'):
             break
