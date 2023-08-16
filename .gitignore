@@ -3,7 +3,11 @@
 *.txt
 *.jpg
 *.png
-*.py
+./*.py
+test.py
+test1.py
+__pycache__/
+# custom
 
 
 devel/

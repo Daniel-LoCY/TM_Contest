@@ -8,9 +8,9 @@ import math
 from contest_msgs.msg import *
 
 # model
-model = YOLO("/yolo/ult/ss-best-24.pt")
+model = YOLO("/yolo/ult/best-33.pt")
 # object classes
-classNames = ['base', 'cotton-swab', 'tube']
+classNames = ['cotton-ball','base', 'cotton-swab', 'syringe', 'syringe-full','tube' ]
 
 bridge = CvBridge()
 

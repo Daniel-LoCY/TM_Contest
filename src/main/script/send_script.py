@@ -54,7 +54,7 @@ def radius2degree(radius: tuple()):
     return degree
 
 def feedback_callback(msg: FeedbackState): # 手臂姿態
-    return
+    # return
     print(msg, '\n')
     # calculate position
     print(f"x: {msg.tool_pose[0]*1000}")
@@ -84,17 +84,19 @@ m = 100
 
 def main(x, y):
 
-
+    cmd = None
     tm_send_gripper_client(True)
+    # tm_send_gripper_client(False)
 
     # rospy.sleep(delay)
 
-    cmd = f"PTP(\"CPP\",{x},  {y}, 30,200,0,180,{speed},{m},0,false,0,2,4)"
-    # cmd = f"Move_PTP(\"CPP\",0,0,0,20,0,0,{speed},{m},0,false)"
-    pose = get_tf("base", "tool_target")
-    print(pose)
-    cmd = f"PTP(\"CPP\",{pose.translation.x},  {pose.translation.y}, {pose.translation.z}, {pose.rotation.x}, {pose.rotation.y}, {pose.rotation.z}, {speed},{m},0,false,0,2,4)"
-    resp = tm_send_script_client(cmd)
+    # cmd = f"PTP(\"CPP\",{x},  {y}, 35,180,0,180,{speed},{m},0,false,0,2,4)"
+    cmd = f"Move_PTP(\"CPP\",0,0,-5,-10,0,0,{speed},{m},0,false)"
+    # pose = get_tf("base", "tool_target")
+    # # print(pose)
+    # cmd = f"PTP(\"CPP\",{pose.translation.x},  {pose.translation.y}, {pose.translation.z}, {pose.rotation.x}, {pose.rotation.y}, {pose.rotation.z}, {speed},{m},0,false,0,2,4)"
+    if cmd is not None:
+        resp = tm_send_script_client(cmd)
     # print(resp)
 
 if __name__ == '__main__':
