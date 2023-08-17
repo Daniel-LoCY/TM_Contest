@@ -27,14 +27,14 @@ def main():
         color = capture.color
         color = cv2.cvtColor(color, cv2.COLOR_BGRA2BGR)
         # cv2.imwrite('color.png', color)
-        pub_color.publish(bridge.cv2_to_imgmsg(color, "passthrough"))
+        # pub_color.publish(bridge.cv2_to_imgmsg(color, "passthrough"))
 
-        ir = capture.transformed_ir
+        ir = capture.ir
         # cv2.imwrite('ir.png', colorize(ir, (None, 5000), cv2.COLORMAP_BONE))
-        pub_ir.publish(bridge.cv2_to_imgmsg(ir, "passthrough"))
+        # pub_ir.publish(bridge.cv2_to_imgmsg(ir, "passthrough"))
 
-        depth = capture.transformed_depth
-        pub_depth.publish(bridge.cv2_to_imgmsg(depth, "passthrough"))
+        # depth = capture.transformed_depth
+        # pub_depth.publish(bridge.cv2_to_imgmsg(depth, "passthrough"))
 
         # cv2.circle(color, (800, 350), 5, (0, 0, 255), -1)
         # cv2.circle(color, (1000, 350), 5, (0, 0, 255), -1)
@@ -42,10 +42,10 @@ def main():
         # cv2.circle(ir, (800+4, 350+2), 5, (0, 0, 255), -1)
         # cv2.circle(ir, (1000+2, 350+1), 5, (0, 0, 255), -1)
 
-        # cv2.imshow('color', color)
-        # cv2.imshow('ir', colorize(ir, (None, 5000), cv2.COLORMAP_BONE))
-        # if cv2.waitKey(1) & 0xFF == ord('q'):
-        #     break
+        cv2.imshow('color', color)
+        cv2.imshow('ir', colorize(ir, (None, 5000), cv2.COLORMAP_BONE))
+        if cv2.waitKey(1) & 0xFF == ord('q'):
+            break
 
 if __name__ == '__main__':
     main()

@@ -53,10 +53,12 @@ def check(target_pose, threshold=0.1): # 檢查手臂是否到達目標點
 
 def yolo_callback(msg: yolo): # yolo辨識結果
     global x, y, class_name, confidence, color, x1, y1, x2, y2, status
+    rospy.loginfo(msg)
+    print()
     info = msg.info
     _class_name = info.class_name
     _confidence = info.confidence
-    if _class_name == status and _confidence > 0.5:
+    if _class_name in status and _confidence > 0.5:
         rospy.loginfo(f"detected: {_class_name}, {_confidence}")
         class_name = info.class_name
         confidence = info.confidence
@@ -100,10 +102,10 @@ error_y = 0
 # rospy.sleep(1)
 
 delay = 5
-z_low_floor = -21 # z軸夾取最低點 mm
+z_low_floor = 37 # z軸夾取最低點 mm
 speed = 200
 m = 100
-status = "cotton-swab"
+status = ["cotton-swab"]
 
 # t = threading.Thread(target=pub_tf_always)
 # t.daemon = True
@@ -111,15 +113,15 @@ status = "cotton-swab"
 # rospy.sleep(5)
 # exit()
 
+# x1, y1, x2, y2, color = 0, 0, 0, 0, None
 # def bbx():
 #     global x1, y1, x2, y2, color
-#     # cv2.rectangle(color, (x1, y1), (x2, y2), (255, 0, 255), 3)
+#     cv2.rectangle(color, (x1, y1), (x2, y2), (255, 0, 255), 3)
 #     cv2.imshow('color', color)
 #     cv2.waitKey(1)
 
 # t = threading.Thread(target=bbx)
 # t.daemon = True
-# t.start()
 
 '''
 # while x == 0 and y == 0:
@@ -155,6 +157,8 @@ status = "cotton-swab"
 readyPose()
 # exit()
 rospy.sleep(1)
+
+# t.start()
 
 
 
@@ -194,7 +198,7 @@ while True:
 
 target = depthCamera2arm(vein_target[0], vein_target[1])
 xx, yy = pixel2mm(depth.shape[1]//2-1-vein_target[0], depth.shape[0]//2-1-vein_target[1])
-vein_height = get_target_z(xx, yy, depth_val, depth[depth.shape[0]//2-1, depth.shape[1]//2-1])+z_low_floor+35
+vein_height = get_target_z(xx, yy, depth_val, depth[depth.shape[0]//2-1, depth.shape[1]//2-1])+z_low_floor
 
 rospy.loginfo(f"vein_height: {vein_height}")
 
@@ -225,8 +229,9 @@ while True:
     try:
         if class_name == "cotton-swab":
             rospy.loginfo("detect cotton-swab")
-            # rospy.loginfo(x, y)
+            rospy.loginfo(f"x, y: {x}, {y}")
             target = camera2arm(x, y)
+            origin_target = target
             rospy.loginfo(f"target: {target}")
             target_pose = (target[0], target[1], z_low_floor+50, 180, 0, 180)
             cmd = f"PTP(\"CPP\",{target_pose}, {speed}, {m}, 0, false, 0, 2, 4)"
@@ -272,6 +277,11 @@ while True:
                 cmd = f"PTP(\"CPP\",{target_pose}, {speed}, {m}, 0, false, 0, 2, 4)"
                 resp = tm_send_script_client(cmd)
                 rospy.sleep(1)
+
+            target_pose = (origin_target[0], origin_target[1], z_low_floor, 180, 0, 180)
+            cmd = f"PTP(\"CPP\",{target_pose}, {speed}, {m}, 0, false, 0, 2, 4)"
+            resp = tm_send_script_client(cmd)
+            tm_send_gripper_client(False)
             
             # for i in range(1):
             #     cmd = f"Move_PTP(\"CPP\",0,0,0,0,0,20,{speed},{m},0,false)"
@@ -302,15 +312,16 @@ readyPose()
 # exit()
 # 4. 抽血
 rospy.sleep(3)
-status = "syringe"
+status = ["syringe", "syringe-full"]
 rospy.loginfo(f"Status: {status}")
 
 while True:
     # break
     try:
-        if class_name == status:
+        if class_name in status:
             rospy.loginfo(f"detect {status}")
             target = camera2arm(x, y)
+            origin_target = target
             target_pose = (target[0], target[1]-20, z_low_floor+50, 180, 0, 180)
             cmd = f"PTP(\"CPP\",{target_pose}, {speed}, {m}, 0, false, 0, 2, 4)"
             resp = tm_send_script_client(cmd)
@@ -324,12 +335,12 @@ while True:
             tm_send_gripper_client(True)
             # break
             rospy.sleep(3)
-            cmd = f"Move_PTP(\"CPP\",0,0,50,0,0,0,{speed},{m},0,false)"
+            cmd = f"Move_PTP(\"CPP\",0,0,40,0,0,0,{speed},{m},0,false)"
             resp = tm_send_script_client(cmd)
             rospy.sleep(3)
 
 
-            target_pose = (vein_target[0], vein_target[1], vein_target[2], 180, 0, 180)
+            target_pose = (vein_target[0], vein_target[1]-125, vein_target[2], 180, 0, 180)
             cmd = f"PTP(\"CPP\",{target_pose}, {speed}, {m}, 0, false, 0, 2, 4)"
             resp = tm_send_script_client(cmd)
             # check(target_pose)
@@ -337,15 +348,21 @@ while True:
 
             # rospy.loginfo("check")
 
-            cmd = f"Move_PTP(\"CPP\",0,-100,0,-20,0,0,{speed},{m},0,false)"
+            cmd = f"Move_PTP(\"CPP\",0,0,10,0,0,0,{speed},{m},0,false)"
             resp = tm_send_script_client(cmd)
+            rospy.sleep(3)
 
-            cmd = f"Move_PTP(\"CPP\",0,0,0,-15,0,0,{speed},{m},0,false)"
+            cmd = f"Move_PTP(\"CPP\",0,0,0,-16.5,0,0,{speed},{m},0,false)"
             resp = tm_send_script_client(cmd)
+            rospy.sleep(3)
+
+            cmd = f"Move_PTP(\"CPP\",0,0, 0,0,0,0,{speed},{m},0,false)"
+            resp = tm_send_script_client(cmd)
+            rospy.sleep(3)
 
             # exit()
 
-            for i in range(30):
+            for i in range(80):
                 now_pose = arm_pose # 紀錄現在手臂的位置
                 rospy.sleep(0.1)
             transform = get_tf("base", "tool_target")
@@ -358,11 +375,20 @@ while True:
             rospy.sleep(10)
             # rospy.sleep(30) # 等待抽血
 
+            while class_name != "syringe-full":
+                rospy.loginfo("Waiting for syringe-full...")
+                rospy.sleep(0.01)
+
             target_pose = now_pose
             cmd = f"PTP(\"CPP\",{target_pose}, {speed}, {m}, 0, false, 0, 2, 4)"
             resp = tm_send_script_client(cmd)
             # check(target_pose)
             rospy.sleep(3)
+            
+            target_pose = (origin_target[0], origin_target[1], z_low_floor, 180, 0, 180)
+            cmd = f"PTP(\"CPP\",{target_pose}, {speed}, {m}, 0, false, 0, 2, 4)"
+            resp = tm_send_script_client(cmd)
+            tm_send_gripper_client(False)
 
             readyPose()
 
@@ -374,18 +400,18 @@ while True:
         rospy.loginfo(f"No detection {e}")
         rospy.sleep(0.1)
 
-exit()
+# exit()
 
 # 5. ???
 # 3. 消毒
 rospy.sleep(3)
-status = "Cotton-ball"
+status = ["cotton-ball"]
 rospy.loginfo(f"Status: {status}")
 
 while True:
     # break
     try:
-        if class_name == status:
+        if class_name in status:
             rospy.loginfo(f"detect {status}")
             # rospy.loginfo(x, y)
             target = camera2arm(x, y)

@@ -35,9 +35,9 @@ def tm_send_gripper_client(cmd: bool): # True: 夾取, False: 放開
         print("Service call failed: %s" % e)
 
 if __name__ == "__main__":
-    x = 300
+    x = 0
     y = 500
-    z = -10
+    z = 40-2
     ready = True
     # ready = False
     if ready:
