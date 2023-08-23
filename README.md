@@ -9,6 +9,6 @@
 
 ## Docker
 
-### [Image](https://github.com/Daniel-LoCY/TM_Contest/tree/master)
+### [Image](https://hub.docker.com/r/game48875/tm_contest)
 
 docker run --rm -it --gpus all --net=host -v {local_path}:{container_path} -e DISPLAY=$DISPLAY -v /tmp/.X11-unix:/tmp/.X11-unix {image_name}
